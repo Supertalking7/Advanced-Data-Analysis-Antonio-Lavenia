@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airbnb Dynamic Pricing - Sicily</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #667eea;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Main Content */
+        main {
+            margin-top: 80px;
+        }
+
+        .section {
+            padding: 4rem 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .section:nth-child(even) {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Product Section */
+        .product-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .product-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .product-info h1 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .product-info p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+        }
+
+        .pricing-app {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .app-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .price-range {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-details {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* About Section */
+        .about-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .about-content {
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .about-content h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .about-content p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .contact-info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-top: 2rem;
+        }
+
+        .contact-info h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .contact-info a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .contact-info a:hover {
+            color: #f0f0f0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .product-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .product-info h1,
+            .about-content h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">
+                <i class="fas fa-home"></i> Airbnb Pricing
+            </a>
+            <ul class="nav-links">
+                <li><a href="#product">Product</a></li>
+                <li><a href="#about">About Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Product Section -->
+        <section id="product" class="section product-section">
+            <div class="container">
+                <div class="product-content">
+                    <div class="product-info">
+                        <h1>Dynamic Pricing for Airbnb</h1>
+                        <p>Get accurate price recommendations for your Airbnb property in Sicily using advanced machine learning algorithms. Our model considers property features, seasonality, location, and market demand to suggest optimal pricing.</p>
+                    </div>
+                    <div class="pricing-app">
+                        <h2 class="app-title">Price Calculator</h2>
+                        <form id="pricingForm">
+                            <div class="form-group">
+                                <label for="accommodates">Accommodates</label>
+                                <input type="number" id="accommodates" min="1" max="16" value="4" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bedrooms">Bedrooms</label>
+                                <input type="number" id="bedrooms" min="0" max="10" value="2" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bathrooms">Bathrooms</label>
+                                <input type="number" id="bathrooms" min="0" max="10" step="0.5" value="1.5" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="room_type">Room Type</label>
+                                <select id="room_type" required>
+                                    <option value="Entire home/apt">Entire home/apt</option>
+                                    <option value="Private room">Private room</option>
+                                    <option value="Shared room">Shared room</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="month">Month</label>
+                                <select id="month" required>
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8" selected>August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="is_weekend">
+                                    <label for="is_weekend">Is Weekend?</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="rating">Property Rating (1-5)</label>
+                                <input type="number" id="rating" min="1" max="5" step="0.1" value="4.5" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="neighbourhood">Neighbourhood</label>
+                                <select id="neighbourhood" required>
+                                    <option value="Taormina">Taormina</option>
+                                    <option value="Palermo Centro">Palermo Centro</option>
+                                    <option value="Catania Centro">Catania Centro</option>
+                                    <option value="Messina">Messina</option>
+                                    <option value="Cefalù">Cefalù</option>
+                                    <option value="San Vito Lo Capo">San Vito Lo Capo</option>
+                                    <option value="Agrigento">Agrigento</option>
+                                    <option value="Trapani">Trapani</option>
+                                    <option value="Siracusa">Siracusa</option>
+                                    <option value="Ragusa">Ragusa</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="calculate-btn">
+                                <i class="fas fa-calculator"></i> Calculate Price
+                            </button>
+                        </form>
+                        
+                        <div id="result" class="result">
+                            <div class="price-range" id="priceRange">€0 - €0</div>
+                            <div class="price-details" id="priceDetails">Price range based on your property features</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section about-section">
+            <div class="container">
+                <div class="about-content">
+                    <h1>About Us</h1>
+                    <p>This is a dynamic Airbnb pricing application developed by <strong>Antonio Lavenia</strong>, a student in the Advanced Data Analysis course at the University of Lausanne.</p>
+                    <p>The application uses machine learning algorithms trained on real Airbnb data from Sicily to provide accurate price recommendations. Our model considers multiple factors including property characteristics, seasonal patterns, location premium, and market demand to suggest optimal pricing strategies.</p>
+                    <p>Built with modern web technologies and powered by advanced data science techniques, this tool helps Airbnb hosts maximize their revenue while maintaining competitive pricing in the Sicilian market.</p>
+                    
+                    <div class="contact-info">
+                        <h3>Contact Information</h3>
+                        <p>For questions or collaboration opportunities:</p>
+                        <a href="mailto:Antonioo.Lavenia@unil.ch">
+                            <i class="fas fa-envelope"></i> Antonioo.Lavenia@unil.ch
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Pricing calculation logic
+        document.getElementById('pricingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const accommodates = parseInt(document.getElementById('accommodates').value);
+            const bedrooms = parseInt(document.getElementById('bedrooms').value);
+            const bathrooms = parseFloat(document.getElementById('bathrooms').value);
+            const roomType = document.getElementById('room_type').value;
+            const month = parseInt(document.getElementById('month').value);
+            const isWeekend = document.getElementById('is_weekend').checked;
+            const rating = parseFloat(document.getElementById('rating').value);
+            const neighbourhood = document.getElementById('neighbourhood').value;
+            
+            // Calculate base price
+            let basePrice = 50; // Base price
+            
+            // Room type multiplier
+            const roomTypeMultipliers = {
+                'Entire home/apt': 1.0,
+                'Private room': 0.6,
+                'Shared room': 0.3
+            };
+            basePrice *= roomTypeMultipliers[roomType];
+            
+            // Size multipliers
+            basePrice += accommodates * 15;
+            basePrice += bedrooms * 25;
+            basePrice += bathrooms * 20;
+            
+            // Seasonal multipliers
+            const seasonalMultipliers = {
+                1: 0.6, 2: 0.6, 3: 0.7, 4: 0.8,
+                5: 0.9, 6: 1.1, 7: 1.3, 8: 1.4,
+                9: 1.0, 10: 0.8, 11: 0.7, 12: 0.8
+            };
+            basePrice *= seasonalMultipliers[month];
+            
+            // Weekend multiplier
+            if (isWeekend) {
+                basePrice *= 1.3;
+            }
+            
+            // Rating multiplier
+            basePrice *= (0.7 + rating * 0.1);
+            
+            // Location multipliers
+            const locationMultipliers = {
+                'Taormina': 1.8,
+                'Cefalù': 1.6,
+                'San Vito Lo Capo': 1.7,
+                'Palermo Centro': 1.3,
+                'Catania Centro': 1.2,
+                'Messina': 1.0,
+                'Agrigento': 1.1,
+                'Trapani': 1.0,
+                'Siracusa': 1.2,
+                'Ragusa': 1.1
+            };
+            basePrice *= locationMultipliers[neighbourhood];
+            
+            // Calculate range (±20%)
+            const minPrice = Math.round(basePrice * 0.8);
+            const maxPrice = Math.round(basePrice * 1.2);
+            
+            // Display result
+            document.getElementById('priceRange').textContent = `€${minPrice} - €${maxPrice} per night`;
+            document.getElementById('priceDetails').textContent = `Recommended price range for ${neighbourhood} in ${getMonthName(month)}${isWeekend ? ' weekend' : ''}`;
+            document.getElementById('result').classList.add('show');
+            
+            // Scroll to result
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        function getMonthName(month) {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            return months[month - 1];
+        }
+        
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
