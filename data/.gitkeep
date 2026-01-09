@@ -1,0 +1,3 @@
+# Data directory
+# Large CSV/XLSX files are excluded via .gitignore
+# See README.md for data requirements
